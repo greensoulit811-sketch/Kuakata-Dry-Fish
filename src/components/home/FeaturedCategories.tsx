@@ -3,8 +3,9 @@ import { useCategories } from '@/hooks/useShopData';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { ArrowRight } from 'lucide-react';
+import type { HomepageSection } from '@/hooks/useHomepageTemplates';
 
-export function FeaturedCategories() {
+export function FeaturedCategories({ section }: { section?: HomepageSection }) {
   const { data: categories = [], isLoading } = useCategories();
   const { t } = useSiteSettings();
   const { ref: sectionRef, isVisible } = useScrollReveal();
@@ -15,8 +16,7 @@ export function FeaturedCategories() {
         <div className="container-shop">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold">{t('home.shopByCategory')}</h2>
-              <p className="text-muted-foreground mt-1">Find what you're looking for</p>
+              <h2 className="text-2xl md:text-3xl font-bold">{section?.title || t('home.shopByCategory')}</h2>
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
@@ -29,24 +29,36 @@ export function FeaturedCategories() {
     );
   }
 
+  const categoryConfigs = [
+    { name: 'OFFICE BAG', color: '#4b68e1' },
+    { name: 'GIFT ACCESSORIES', color: '#cb9e56' },
+    { name: 'LADIES BAG', color: '#88af4a' },
+    { name: 'GENTS ITEMS', color: '#8c5d3b' },
+    { name: 'JACKET', color: '#2b71ae' },
+    { name: 'TRAVEL BAG', color: '#b22222' },
+    { name: 'GENTS ITEMS', color: '#00a86b' },
+    { name: 'SHOES', color: '#990000' },
+    { name: 'WALLET', color: '#d2691e' },
+    { name: 'BELT', color: '#ff4500' },
+  ];
+
   return (
-    <section className="section-padding" ref={sectionRef}>
+    <section className="py-10 md:py-16 bg-white" ref={sectionRef}>
       <div className="container-shop">
         <div className={`flex items-center justify-between mb-8 reveal-left ${isVisible ? 'reveal-visible' : ''}`}>
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold">{t('home.shopByCategory')}</h2>
-            <p className="text-muted-foreground mt-1">Find what you're looking for</p>
+            <h2 className="text-xl md:text-2xl font-bold text-foreground">{section?.title || t('home.shopByCategory')}</h2>
           </div>
           <Link
             to="/categories"
-            className="hidden sm:flex items-center gap-2 text-sm font-medium text-accent hover:underline"
+            className="flex items-center gap-1 text-[11px] md:text-sm font-semibold text-muted-foreground hover:text-accent transition-colors"
           >
-            {t('common.viewAll')} <ArrowRight className="h-4 w-4" />
+            View All <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {categories.slice(0, 8).map((category, index) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6">
+          {categories.slice(0, 10).map((category, index) => (
             <Link
               key={category.id}
               to={`/category/${category.slug}`}
@@ -55,21 +67,15 @@ export function FeaturedCategories() {
               <img
                 src={category.image}
                 alt={category.name}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                className="category-card-img"
               />
+              <div className="category-card-overlay" />
               <div className="category-card-content">
-                <h3 className="text-lg md:text-xl font-semibold">{category.name}</h3>
+                <h3 className="category-card-title">{category.name}</h3>
               </div>
             </Link>
           ))}
         </div>
-
-        <Link
-          to="/categories"
-          className="mt-6 flex sm:hidden items-center justify-center gap-2 text-sm font-medium text-accent hover:underline"
-        >
-          {t('common.viewAll')} {t('nav.categories')} <ArrowRight className="h-4 w-4" />
-        </Link>
       </div>
     </section>
   );

@@ -439,7 +439,7 @@ export default function ProductDetailsPage() {
                 </Button>
                 <Button
                   size="lg"
-                  className="btn-accent w-full h-12 rounded-lg font-semibold text-sm shadow-sm hover:shadow-md transition-all gap-2"
+                  className="btn-buy-now w-full h-12 rounded-lg font-semibold text-sm shadow-sm hover:shadow-md transition-all gap-2"
                   onClick={handleBuyNow}
                   disabled={isBuyingNow || effectiveStock === 0 || (hasVariants && !selectedVariant)}
                 >
@@ -590,7 +590,7 @@ export default function ProductDetailsPage() {
               {t('product.addToCart')}
             </Button>
             <Button
-              className="btn-accent w-full h-11 text-sm font-semibold rounded-lg shadow-sm gap-2"
+              className="btn-buy-now w-full h-11 text-sm font-semibold rounded-lg shadow-sm gap-2"
               onClick={handleBuyNow}
               disabled={isBuyingNow || effectiveStock === 0 || (hasVariants && !selectedVariant)}
               aria-label={t('product.buyNow')}

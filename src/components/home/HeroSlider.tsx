@@ -37,7 +37,7 @@ export function HeroSlider() {
 
   if (isError) {
     return (
-      <section className="relative overflow-hidden bg-secondary aspect-[16/5] md:aspect-[16/6]">
+      <section className="relative overflow-hidden bg-secondary aspect-[16/9] md:aspect-[16/6]">
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center p-6">
           <p className="text-muted-foreground">
             Couldn't load the slider. {error instanceof Error ? error.message : ''}
@@ -50,7 +50,7 @@ export function HeroSlider() {
 
   if (isLoading || isFetching) {
     return (
-      <section className="relative overflow-hidden bg-secondary aspect-[16/5] md:aspect-[16/6]">
+      <section className="relative overflow-hidden bg-secondary aspect-[16/9] md:aspect-[16/6]">
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent" />
           {isStuck && (
@@ -63,7 +63,7 @@ export function HeroSlider() {
 
   if (slides.length === 0) {
     return (
-      <section className="relative overflow-hidden bg-secondary aspect-[16/5] md:aspect-[16/6]">
+      <section className="relative overflow-hidden bg-secondary aspect-[16/9] md:aspect-[16/6]">
         <div className="absolute inset-0 flex items-center justify-center">
           <p className="text-muted-foreground">No slides configured</p>
         </div>
@@ -75,7 +75,7 @@ export function HeroSlider() {
     <section className="w-full">
       {/* Slider */}
       <div className="relative overflow-hidden rounded-lg mx-2 md:mx-3">
-        <div className="relative aspect-[16/5] md:aspect-[16/6]">
+        <div className="relative aspect-[16/9] md:aspect-[16/6]">
           {slides.map((slide, index) => {
             const isActive = index === currentSlide;
             return (
@@ -89,7 +89,7 @@ export function HeroSlider() {
                 <img
                   src={slide.image}
                   alt={slide.heading}
-                  className="w-full h-full object-cover rounded-lg"
+                  className="w-full h-full object-cover object-top rounded-lg"
                 />
               </Link>
             );

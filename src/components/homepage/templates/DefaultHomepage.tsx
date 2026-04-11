@@ -7,38 +7,44 @@ import { BestSellers } from '@/components/home/BestSellers';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useNewArrivals } from '@/hooks/useShopData';
+import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { ProductCard } from '@/components/products/ProductCard';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import type { HomepageSection } from '@/hooks/useHomepageTemplates';
 
 const SECTION_COMPONENTS: Record<string, React.ComponentType<{ section: HomepageSection }>> = {
-  hero_slider: () => <HeroSlider />,
-  featured_categories: () => <FeaturedCategories />,
-  featured_products: () => <FeaturedProducts />,
-  best_sellers: () => <BestSellers />,
+  hero_slider: ({ section }) => <HeroSlider />, // HeroSlider doesn't use section title yet
+  featured_categories: ({ section }) => <FeaturedCategories section={section} />,
+  featured_products: ({ section }) => <FeaturedProducts section={section} />,
+  best_sellers: ({ section }) => <BestSellers section={section} />,
   
 };
 
 function NewArrivalsSection({ section }: { section: HomepageSection }) {
   const { data: newArrivals = [] } = useNewArrivals();
   const { ref, isVisible } = useScrollReveal();
+  const { t } = useSiteSettings();
 
   if (newArrivals.length === 0) return null;
 
   return (
-    <section className="section-padding" ref={ref}>
+    <section className="py-6 md:py-8" ref={ref}>
       <div className="container-shop">
-        <div className={`flex items-center justify-between mb-8 reveal-left ${isVisible ? 'reveal-visible' : ''}`}>
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold">{section.title || 'New Arrivals'}</h2>
-            <p className="text-muted-foreground mt-1">{section.subtitle || 'Fresh styles just landed'}</p>
+        <div className={`flex items-center justify-between mb-4 reveal-left ${isVisible ? 'reveal-visible' : ''}`}>
+          <div className="flex items-center gap-2 md:gap-4">
+            <div>
+              <h2 className="text-base md:text-xl font-bold whitespace-nowrap">{section?.title || t('home.newArrivals')}</h2>
+            </div>
           </div>
-          <Link to="/shop?filter=new" className="hidden sm:flex items-center gap-2 text-sm font-medium text-accent hover:underline">
-            View All <ArrowRight className="h-4 w-4" />
+          <Link
+            to="/shop?filter=new"
+            className="flex items-center gap-1 text-[11px] md:text-xs font-semibold text-muted-foreground hover:text-accent transition-colors"
+          >
+            View All <ArrowRight className="h-3 w-3" />
           </Link>
         </div>
-        <div className="product-grid">
-          {newArrivals.map((product, index) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2 md:gap-4">
+          {newArrivals.slice(0, 5).map((product, index) => (
             <div key={product.id} className={`reveal-base stagger-${index + 1} ${isVisible ? 'reveal-visible' : ''}`}>
               <ProductCard product={product} />
             </div>

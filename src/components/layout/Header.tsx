@@ -38,9 +38,9 @@ export function Header() {
   ];
 
   return (
-    <header className="header-sticky">
+    <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-100 shadow-sm">
       <div className="container-shop">
-        <div className="flex items-center justify-between h-18 md:h-24">
+        <div className="flex items-center justify-between h-16 md:h-20">
           {/* Mobile menu */}
           <Sheet>
             <SheetTrigger asChild className="md:hidden">
@@ -96,7 +96,7 @@ export function Header() {
               <Link
                 key={item.href}
                 to={item.href}
-                className={`text-lg font-semibold tracking-wide uppercase transition-colors hover:text-accent ${
+                className={`text-lg font-semibold tracking-wide transition-colors hover:text-accent ${
                   location.pathname === item.href
                     ? 'text-accent'
                     : 'text-foreground'

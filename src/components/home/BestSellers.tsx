@@ -1,28 +1,28 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Clock } from 'lucide-react';
 import { useBestSellers } from '@/hooks/useShopData';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { ProductCard } from '@/components/products/ProductCard';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import type { HomepageSection } from '@/hooks/useHomepageTemplates';
 
-export function BestSellers() {
+export function BestSellers({ section }: { section?: HomepageSection }) {
   const { data: products = [], isLoading } = useBestSellers();
   const { t } = useSiteSettings();
   const { ref, isVisible } = useScrollReveal();
 
   if (isLoading) {
     return (
-      <section className="section-padding">
+      <section className="py-6 md:py-8">
         <div className="container-shop">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-bold">{t('home.bestSellers')}</h2>
-              <p className="text-muted-foreground mt-1">Customer favorites this month</p>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+              <h2 className="text-lg md:text-xl font-bold">{section?.title || t('home.bestsellers')}</h2>
             </div>
           </div>
           <div className="product-grid">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="aspect-product rounded-xl bg-muted animate-pulse" />
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="aspect-square rounded shadow-sm bg-muted animate-pulse" />
             ))}
           </div>
         </div>
@@ -33,25 +33,24 @@ export function BestSellers() {
   if (products.length === 0) return null;
 
   return (
-    <section className="section-padding" ref={ref}>
+    <section className="py-6 md:py-8" ref={ref}>
       <div className="container-shop">
-        <div className={`flex items-center justify-between mb-8 reveal-left ${isVisible ? 'reveal-visible' : ''}`}>
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold">{t('home.bestSellers')}</h2>
-            <p className="text-muted-foreground mt-1">Customer favorites this month</p>
+        <div className={`flex items-center justify-between mb-4 reveal-left ${isVisible ? 'reveal-visible' : ''}`}>
+          <div className="flex items-center gap-2 md:gap-4">
+            <h2 className="text-base md:text-xl font-bold whitespace-nowrap">{section?.title || t('home.bestSellers')}</h2>
           </div>
           <Link
             to="/shop?filter=bestsellers"
-            className="hidden sm:flex items-center gap-2 text-sm font-medium text-accent hover:underline"
+            className="flex items-center gap-1 text-[11px] md:text-xs font-semibold text-muted-foreground hover:text-accent transition-colors"
           >
-            {t('common.viewAll')} <ArrowRight className="h-4 w-4" />
+            {t('common.viewAll')} <ArrowRight className="h-3 w-3" />
           </Link>
         </div>
 
-        <div className="product-grid">
-          {products.map((product, index) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2 md:gap-4">
+          {products.slice(0, 5).map((product, index) => (
             <div key={product.id} className={`reveal-base stagger-${index + 1} ${isVisible ? 'reveal-visible' : ''}`}>
-              <ProductCard product={product} />
+              <ProductCard product={product} isFlashSale />
             </div>
           ))}
         </div>

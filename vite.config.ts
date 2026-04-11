@@ -18,4 +18,28 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    target: ["es2020", "edge88", "firefox78", "chrome87", "safari14"],
+    minify: "terser",
+    chunkSizeWarningLimit: 2000,
+    terserOptions: {
+      compress: {
+        drop_console: false,
+      },
+    },
+    commonjsOptions: {
+      include: [/node_modules/],
+      transformMixedEsModules: true,
+    },
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
+          'supabase': ['@supabase/supabase-js'],
+          'query': ['@tanstack/react-query'],
+        },
+      },
+    },
+  },
 }));
