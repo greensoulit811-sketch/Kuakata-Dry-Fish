@@ -44,7 +44,7 @@ function NewArrivalsSection({ section }: { section: HomepageSection }) {
           </Link>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2 md:gap-4">
-          {newArrivals.slice(0, 5).map((product, index) => (
+          {newArrivals.slice(0, 8).map((product, index) => (
             <div key={product.id} className={`reveal-base stagger-${index + 1} ${isVisible ? 'reveal-visible' : ''}`}>
               <ProductCard product={product} />
             </div>

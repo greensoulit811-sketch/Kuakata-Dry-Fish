@@ -21,7 +21,7 @@ export function BestSellers({ section }: { section?: HomepageSection }) {
             </div>
           </div>
           <div className="product-grid">
-            {[1, 2, 3, 4, 5].map((i) => (
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div key={i} className="aspect-square rounded shadow-sm bg-muted animate-pulse" />
             ))}
           </div>
@@ -48,7 +48,7 @@ export function BestSellers({ section }: { section?: HomepageSection }) {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2 md:gap-4">
-          {products.slice(0, 5).map((product, index) => (
+          {products.slice(0, 8).map((product, index) => (
             <div key={product.id} className={`reveal-base stagger-${index + 1} ${isVisible ? 'reveal-visible' : ''}`}>
               <ProductCard product={product} isFlashSale />
             </div>

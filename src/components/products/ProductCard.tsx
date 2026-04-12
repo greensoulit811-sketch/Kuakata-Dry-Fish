@@ -110,11 +110,11 @@ export function ProductCard({ product }: ProductCardProps) {
           </h3>
           
           <div className="flex items-center justify-center gap-2 mb-2">
-            <span className="font-bold text-accent text-base md:text-lg">
+            <span className="font-bold text-accent text-base md:text-2xl">
               ৳{product.sale_price || product.price}
             </span>
             {hasDiscount && (
-              <span className="text-base text-muted-foreground line-through">
+              <span className="text-base md:text-xl text-muted-foreground line-through">
                 ৳{product.price}
               </span>
             )}
@@ -125,7 +125,7 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* Action Buttons */}
       <div className="px-2 pb-3 mt-auto flex flex-col gap-1.5">
         <Button
-          className="btn-buy-now h-7 md:h-8"
+          className="btn-buy-now h-7 md:h-9"
           onPointerDown={e => e.stopPropagation()}
           onMouseDown={e => e.stopPropagation()}
           onTouchStart={e => e.stopPropagation()}
@@ -136,7 +136,7 @@ export function ProductCard({ product }: ProductCardProps) {
           {isBuyingNow ? <Loader2 className="h-3 w-3 animate-spin" /> : 'অর্ডার করুন'}
         </Button>
         <Button
-          className="btn-view h-7 md:h-8 text-primary"
+          className="btn-view h-7 md:h-9 text-primary"
           onPointerDown={e => e.stopPropagation()}
           onMouseDown={e => e.stopPropagation()}
           onTouchStart={e => e.stopPropagation()}
