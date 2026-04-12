@@ -105,12 +105,12 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Content */}
         <div className="px-3 text-center mt-4">
-          <h3 className="text-[14px] md:text-[20px] font-semibold line-clamp-2 mb-2 min-h-[20px] leading-snug">
+          <h3 className="text-[14px] md:text-[18px] font-semibold line-clamp-2 mb-2 min-h-[20px] leading-snug">
             {product.name}
           </h3>
           
           <div className="flex items-center justify-center gap-2 mb-2">
-            <span className="font-bold text-accent text-base md:text-2xl">
+            <span className="font-bold text-accent text-base md:text-xl">
               ৳{product.sale_price || product.price}
             </span>
             {hasDiscount && (

@@ -33,14 +33,14 @@ function NewArrivalsSection({ section }: { section: HomepageSection }) {
         <div className={`flex items-center justify-between mb-4 reveal-left ${isVisible ? 'reveal-visible' : ''}`}>
           <div className="flex items-center gap-2 md:gap-4">
             <div>
-              <h2 className="text-base md:text-xl font-bold whitespace-nowrap">{section?.title || t('home.newArrivals')}</h2>
+              <h2 className="text-base md:text-xl font-bold whitespace-nowrap">{section?.title || 'প্রিমিয়াম কোয়ালিটি শুটকি'}</h2>
             </div>
           </div>
           <Link
             to="/shop?filter=new"
             className="flex items-center gap-1 text-[11px] md:text-xs font-semibold text-muted-foreground hover:text-accent transition-colors"
           >
-            View All <ArrowRight className="h-3 w-3" />
+            {t('common.viewAll')} <ArrowRight className="h-3 w-3" />
           </Link>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2 md:gap-4">

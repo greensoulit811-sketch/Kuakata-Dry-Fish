@@ -16,7 +16,7 @@ export interface HomepageSection {
   id: string;
   template_id: string;
   section_type: string;
-  title: string;
+  title:string;
   subtitle: string;
   enabled: boolean;
   sort_order: number;
