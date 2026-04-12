@@ -175,7 +175,7 @@ export default function ProductDetailsPage() {
     
     setIsBuyingNow(true);
     
-    addItem({
+    const buyNowItem = {
       id: selectedVariant ? `${product.id}-${selectedVariant.id}` : product.id,
       name: selectedVariant
         ? `${product.name} (${[selectedVariant.size, selectedColor || selectedVariant.color].filter(Boolean).join(' / ')})`
@@ -193,7 +193,7 @@ export default function ProductDetailsPage() {
       variantInfo: selectedVariant
         ? { size: selectedVariant.size, color: selectedColor || selectedVariant.color }
         : undefined,
-    });
+    };
     
     trackAddToCart({
       contentId: product.id,
@@ -203,7 +203,7 @@ export default function ProductDetailsPage() {
       quantity,
     });
     
-    navigate('/checkout?mode=buynow');
+    navigate('/checkout?mode=buynow', { state: { buyNowItem } });
   };
 
   return (

@@ -62,7 +62,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
     setIsBuyingNow(true);
 
-    addItem({
+    const buyNowItem = {
       id: product.id,
       name: product.name,
       price: product.price,
@@ -70,9 +70,9 @@ export function ProductCard({ product }: ProductCardProps) {
       image: product.images[0] || '/placeholder.svg',
       quantity: 1,
       stock: product.stock,
-    });
+    };
 
-    navigate('/checkout?mode=buynow');
+    navigate('/checkout?mode=buynow', { state: { buyNowItem } });
   };
 
   const hasDiscount = product.sale_price && product.sale_price < product.price;

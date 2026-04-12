@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { useCart } from '@/contexts/CartContext';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
@@ -18,7 +18,22 @@ import { trackInitiateCheckout } from '@/lib/facebook-pixel';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
-  const { items, subtotal, clearCart } = useCart();
+  const location = useLocation();
+  const { items: cartItems, subtotal: cartSubtotal, clearCart } = useCart();
+
+  const searchParams = new URLSearchParams(location.search);
+  const isBuyNow = searchParams.get('mode') === 'buynow';
+  const buyNowItem = location.state?.buyNowItem;
+
+  const items = isBuyNow && buyNowItem ? [buyNowItem] : cartItems;
+  
+  const subtotal = useMemo(() => {
+    if (isBuyNow && buyNowItem) {
+      const price = buyNowItem.salePrice ?? buyNowItem.price;
+      return price * buyNowItem.quantity;
+    }
+    return cartSubtotal;
+  }, [isBuyNow, buyNowItem, cartSubtotal]);
   const { user } = useAuth();
   const { t, formatCurrency, settings } = useSiteSettings();
   const createOrder = useCreateOrder();
@@ -217,7 +232,9 @@ export default function CheckoutPage() {
         incrementCouponUsage.mutate(appliedCoupon.id);
       }
 
-      clearCart();
+      if (!isBuyNow) {
+        clearCart();
+      }
       navigate(`/order-success?orderId=${orderNumber}`);
     } catch (error) {
       // Error is handled by the mutation
