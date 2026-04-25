@@ -1,13 +1,35 @@
 import { useSearchParams, Link } from 'react-router-dom';
+import { useEffect } from 'react';
 import { CheckCircle, Package, ArrowRight } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { Button } from '@/components/ui/button';
+import { useOrderByNumber } from '@/hooks/useOrders';
+import { trackPurchase } from '@/lib/facebook-pixel';
 
 export default function OrderSuccessPage() {
   const [searchParams] = useSearchParams();
   const orderId = searchParams.get('orderId') || 'N/A';
-  const { t } = useSiteSettings();
+  const { t, settings } = useSiteSettings();
+  const { data: order } = useOrderByNumber(orderId);
+
+  useEffect(() => {
+    if (order) {
+      console.log('[OrderSuccess] Tracking Purchase:', order.order_number);
+      trackPurchase({
+        orderId: order.order_number,
+        value: order.total,
+        currency: settings.currency_code,
+        contents: order.order_items?.map(item => ({
+          id: item.product_id || '',
+          quantity: item.quantity,
+          item_price: item.price
+        })) || [],
+        email: order.customer_email || undefined,
+        phone: order.customer_phone || undefined,
+      });
+    }
+  }, [order, settings.currency_code]);
 
   return (
     <Layout>

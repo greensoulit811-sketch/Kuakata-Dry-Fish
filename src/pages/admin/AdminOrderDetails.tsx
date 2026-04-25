@@ -58,7 +58,7 @@ export default function AdminOrderDetails() {
   const sendPurchaseEvent = async () => {
     if (!order) return;
     try {
-      const eventId = `purchase_${order.order_number}_${Date.now()}`;
+      const eventId = order.order_number;
       const { data, error } = await supabase.functions.invoke('meta-capi', {
         body: {
           event_name: 'Purchase',

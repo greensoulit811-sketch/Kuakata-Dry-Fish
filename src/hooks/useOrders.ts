@@ -78,6 +78,23 @@ export const useOrder = (id: string) => {
   });
 };
 
+export const useOrderByNumber = (orderNumber: string) => {
+  return useQuery({
+    queryKey: ['order-by-number', orderNumber],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*, order_items(*)')
+        .eq('order_number', orderNumber)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data as (Order & { order_items: OrderItem[] }) | null;
+    },
+    enabled: !!orderNumber && orderNumber !== 'N/A',
+  });
+};
+
 export const useCreateOrder = () => {
   const queryClient = useQueryClient();
   
