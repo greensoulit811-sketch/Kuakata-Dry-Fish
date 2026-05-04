@@ -239,8 +239,12 @@ export default function AdminCourierSettings() {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4 border-t border-border">
-            <Button onClick={handleSave} disabled={saveSettings.isPending}>
+          <div className="flex items-center gap-3 pt-6 border-t border-border">
+            <Button 
+              onClick={handleSave} 
+              disabled={saveSettings.isPending}
+              className="min-w-[140px] bg-[#f59e0b] hover:bg-[#d97706] text-white border-none"
+            >
               {saveSettings.isPending ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
@@ -252,6 +256,7 @@ export default function AdminCourierSettings() {
               variant="outline" 
               onClick={handleTestConnection}
               disabled={testConnection.isPending || !formData.api_key || !formData.api_secret}
+              className="min-w-[140px]"
             >
               {testConnection.isPending ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />

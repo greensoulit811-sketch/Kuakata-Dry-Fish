@@ -158,7 +158,7 @@ export function OrderCourierSection({ order, onPrintLabel }: OrderCourierSection
               <Button 
                 onClick={() => openCreateDialog(false)}
                 disabled={createParcel.isPending}
-                className="flex-1"
+                className="flex-1 bg-[#f59e0b] hover:bg-[#d97706] text-white border-none"
               >
                 {createParcel.isPending ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -247,7 +247,11 @@ export function OrderCourierSection({ order, onPrintLabel }: OrderCourierSection
             <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handleCreateParcel} disabled={createParcel.isPending}>
+            <Button 
+              onClick={handleCreateParcel} 
+              disabled={createParcel.isPending}
+              className="bg-[#f59e0b] hover:bg-[#d97706] text-white border-none"
+            >
               {createParcel.isPending ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (

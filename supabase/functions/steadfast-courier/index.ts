@@ -43,7 +43,25 @@ Deno.serve(async (req) => {
     }
 
     const url = new URL(req.url);
-    const action = url.pathname.split('/').pop();
+    let action = url.pathname.split('/').pop();
+    
+    // If action is the function name, try to get it from query or body
+    if (action === 'steadfast-courier') {
+      action = url.searchParams.get('action');
+    }
+
+    // Read body if method is POST/PUT
+    let body: any = {};
+    if (req.method === 'POST' || req.method === 'PUT') {
+      try {
+        body = await req.json();
+        if (!action && body.action) {
+          action = body.action;
+        }
+      } catch (e) {
+        // Ignore JSON parse error if body is empty
+      }
+    }
 
     const { data: settings } = await supabase
       .from('courier_settings')
@@ -52,8 +70,14 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (action === 'test-connection') {
-      if (!settings?.enabled) {
-        return new Response(JSON.stringify({ success: false, error: 'Steadfast not enabled' }), {
+      if (!settings) {
+        return new Response(JSON.stringify({ success: false, error: 'Please save settings first before testing' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      if (!settings.api_base_url || !settings.api_key || !settings.api_secret) {
+        return new Response(JSON.stringify({ success: false, error: 'API configuration is incomplete' }), {
           status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
@@ -86,7 +110,6 @@ Deno.serve(async (req) => {
         });
       }
 
-      const body = await req.json();
       const payload = {
         invoice: body.invoice,
         recipient_name: body.recipient_name,
@@ -141,7 +164,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      const { consignment_id, order_id } = await req.json();
+      const { consignment_id, order_id } = body;
       if (!consignment_id) {
         return new Response(JSON.stringify({ success: false, error: 'Consignment ID required' }), {
           status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },

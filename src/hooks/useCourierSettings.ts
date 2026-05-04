@@ -82,16 +82,31 @@ export const useSaveCourierSettings = () => {
 export const useTestCourierConnection = () => {
   return useMutation({
     mutationFn: async (provider: string) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const response = await supabase.functions.invoke('steadfast-courier/test-connection', {
+      // Get settings first
+      const { data: settings, error: fetchError } = await supabase
+        .from('courier_settings')
+        .select('*')
+        .eq('provider', provider)
+        .maybeSingle();
+
+      if (fetchError || !settings) throw new Error('Settings not found. Please save first.');
+      if (!settings.api_key || !settings.api_secret || !settings.api_base_url) {
+        throw new Error('API configuration is incomplete');
+      }
+
+      const response = await fetch(`${settings.api_base_url}/get_balance`, {
         headers: {
-          Authorization: `Bearer ${session?.access_token}`,
+          'Api-Key': settings.api_key,
+          'Secret-Key': settings.api_secret,
+          'Content-Type': 'application/json',
         },
       });
 
-      if (response.error) throw new Error(response.error.message);
-      return response.data;
+      const data = await response.json();
+      if (response.ok && data.status === 200) {
+        return { success: true, balance: data.current_balance };
+      }
+      throw new Error(data.message || 'Connection failed');
     },
   });
 };
@@ -110,18 +125,83 @@ export const useCreateCourierParcel = () => {
       invoice: string;
       note?: string;
     }) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const response = await supabase.functions.invoke('steadfast-courier/create-parcel', {
-        body: payload,
+      // Get settings first
+      const { data: settings } = await supabase
+        .from('courier_settings')
+        .select('*')
+        .eq('provider', 'steadfast')
+        .maybeSingle();
+
+      if (!settings?.enabled) throw new Error('Steadfast is not enabled');
+      if (!settings.api_key || !settings.api_secret || !settings.api_base_url) {
+        throw new Error('API configuration is incomplete');
+      }
+
+      const parcelPayload = {
+        invoice: payload.invoice,
+        recipient_name: payload.recipient_name,
+        recipient_phone: payload.recipient_phone,
+        recipient_address: payload.recipient_address,
+        cod_amount: payload.cod_amount,
+        note: payload.note || '',
+      };
+
+      const response = await fetch(`${settings.api_base_url}/create_order`, {
+        method: 'POST',
         headers: {
-          Authorization: `Bearer ${session?.access_token}`,
+          'Api-Key': settings.api_key,
+          'Secret-Key': settings.api_secret,
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify(parcelPayload),
       });
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data.success) throw new Error(response.data.error);
-      return response.data;
+      const data = await response.json();
+      
+      // Log interaction
+      await supabase.from('courier_logs').insert({
+        order_id: payload.order_id,
+        provider: 'steadfast',
+        action: 'create_parcel',
+        status: (response.ok && data.status === 200) ? 'success' : 'failed',
+        message: data.message || (typeof data.errors === 'object' ? JSON.stringify(data.errors) : data.errors) || '',
+        request_payload: parcelPayload,
+        response_payload: data,
+      });
+
+      if (response.ok && data.status === 200) {
+        // Update order
+        await supabase.from('orders').update({
+          courier_provider: 'steadfast',
+          courier_status: 'created',
+          courier_tracking_id: data.consignment?.tracking_code,
+          courier_consignment_id: data.consignment?.consignment_id?.toString(),
+          courier_reference: payload.invoice,
+          courier_payload: parcelPayload,
+          courier_response: data,
+          courier_created_at: new Date().toISOString(),
+          courier_updated_at: new Date().toISOString(),
+        }).eq('id', payload.order_id);
+
+        return { 
+          success: true, 
+          tracking_code: data.consignment?.tracking_code,
+          consignment_id: data.consignment?.consignment_id,
+        };
+      }
+      
+      // Handle complex error objects
+      let errorMessage = data.message || 'Failed to create parcel';
+      if (data.errors && typeof data.errors === 'object') {
+        const errorDetails = Object.entries(data.errors)
+          .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
+          .join('; ');
+        errorMessage = `${errorMessage} (${errorDetails})`;
+      } else if (data.errors) {
+        errorMessage = `${errorMessage} (${data.errors})`;
+      }
+      
+      throw new Error(errorMessage);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
@@ -138,18 +218,63 @@ export const useTrackCourierStatus = () => {
   
   return useMutation({
     mutationFn: async (payload: { consignment_id: string; order_id: string }) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const response = await supabase.functions.invoke('steadfast-courier/track-status', {
-        body: payload,
+      const { data: settings } = await supabase
+        .from('courier_settings')
+        .select('*')
+        .eq('provider', 'steadfast')
+        .maybeSingle();
+
+      if (!settings?.enabled) throw new Error('Steadfast is not enabled');
+      if (!settings.api_key || !settings.api_secret || !settings.api_base_url) {
+        throw new Error('API configuration is incomplete');
+      }
+
+      const response = await fetch(`${settings.api_base_url}/status_by_cid/${payload.consignment_id}`, {
         headers: {
-          Authorization: `Bearer ${session?.access_token}`,
+          'Api-Key': settings.api_key,
+          'Secret-Key': settings.api_secret,
+          'Content-Type': 'application/json',
         },
       });
 
-      if (response.error) throw new Error(response.error.message);
-      if (!response.data.success) throw new Error(response.data.error);
-      return response.data;
+      const data = await response.json();
+
+      await supabase.from('courier_logs').insert({
+        order_id: payload.order_id,
+        provider: 'steadfast',
+        action: 'track_status',
+        status: response.ok ? 'success' : 'failed',
+        message: data.delivery_status || '',
+        request_payload: { consignment_id: payload.consignment_id },
+        response_payload: data,
+      });
+
+      if (response.ok && data.status === 200) {
+        let courierStatus = 'created';
+        const ds = data.delivery_status?.toLowerCase();
+        if (ds === 'delivered') courierStatus = 'delivered';
+        else if (ds === 'cancelled') courierStatus = 'cancelled';
+        else if (ds === 'pending' || ds === 'in_review') courierStatus = 'pending';
+        else if (ds) courierStatus = 'in_transit';
+
+        const updateData: Record<string, any> = { 
+          courier_status: courierStatus, 
+          courier_updated_at: new Date().toISOString() 
+        };
+        
+        if (courierStatus === 'delivered') updateData.status = 'delivered';
+        else if (courierStatus === 'in_transit') updateData.status = 'shipped';
+        
+        await supabase.from('orders').update(updateData).eq('id', payload.order_id);
+
+        return { 
+          success: true, 
+          courier_status: courierStatus, 
+          delivery_status: data.delivery_status 
+        };
+      }
+      
+      throw new Error(data.message || 'Failed to track status');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
